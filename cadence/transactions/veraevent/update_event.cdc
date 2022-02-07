@@ -19,7 +19,7 @@ transaction (id: UInt64, type: String, maxTickets: UInt64, buyLimit: UInt64, tie
     prepare(signer: AuthAccount) {
 
         self.eventAdmin = signer
-        .borrow<&VeraEvent.EventAdmin>(from: VeraEvent.AdminStoragePath)
+        .borrow<&VeraEvent.EventAdmin>(from: VeraEvent.VeraAdminStorage)
         ?? panic("Signer is not the vera event admin")
         self.royaltyType = VeraEvent.RoyaltyType.Percent
         self.royalty = VeraEvent.Royalty(id: 1, type: self.royaltyType, value: 20)

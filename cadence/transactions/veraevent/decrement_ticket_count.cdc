@@ -8,11 +8,11 @@ import VeraEvent from "../../contracts/VeraEvent.cdc"
 transaction(eventID:UInt64, tier:UInt64, subtier: UInt64) {
     
     // Variable to hold event collection
-    let collection: &VeraEvent.Collection
+    let collection: &VeraEvent.EventCollection
     
     prepare(signer: AuthAccount) {
         // get the Event for which the Ticket is to be minted
-        self.collection = signer.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)
+        self.collection = signer.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)
             ?? panic("Could not borrow a reference to the owner's collection")
     }
 

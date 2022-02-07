@@ -16,9 +16,9 @@ pub contract VeraTicket: NonFungibleToken {
 
     // Named Paths
     //
-    pub let CollectionStoragePath: StoragePath
-    pub let CollectionPublicPath: PublicPath
-    pub let MinterStoragePath: StoragePath
+    pub let VeraTicketStorage: StoragePath
+    pub let VeraTicketPubStorage: PublicPath
+    pub let VeraMinterStorage: StoragePath
 
     // totalSupply
     // The total number of Tickets that have been minted
@@ -176,7 +176,7 @@ pub contract VeraTicket: NonFungibleToken {
             if self.ownedNFTs[id] != nil {
                 let token <- self.ownedNFTs.remove(key: id) ?? panic("missing NFT")
                 destroy token
-                let eventCollection = VeraTicket.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+                let eventCollection = VeraTicket.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
                 eventCollection.decrementTicketMinted(eventId: eventID, tier: tier, subtier: subtier)
                 emit Destroy(id: id)
             }
@@ -210,8 +210,6 @@ pub contract VeraTicket: NonFungibleToken {
 		pub fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}, eventID: UInt64, type: VeraTicket.NFTType, tier: UInt64, subtier: UInt64, tokenURI: String) {
 
             let veraevent: VeraEvent.EventStruct = VeraEvent.getEvent(id: eventID)
-            // var eventtier: VeraEvent.Tier = {} as! VeraEvent.Tier
-            // var eventsubtier: VeraEvent.SubTier = {} as! VeraEvent.SubTier
             var eventMaxTickets:UInt64 = veraevent.maxTickets;
             var eventTotalTicketsMinted:UInt64 = veraevent.totalTicketsMinted;
             var maxTickets:UInt64 = 0;
@@ -235,7 +233,6 @@ pub contract VeraTicket: NonFungibleToken {
                 emit Minted(id: VeraTicket.totalSupply)
 
                 VeraTicket.totalSupply = VeraTicket.totalSupply + (1 as UInt64)
-                // veraevent.incrementTicketMinted(tier: tier, subtier: subtier) 
             } else {
                 panic("Max Tickets Minted")
             }
@@ -247,10 +244,8 @@ pub contract VeraTicket: NonFungibleToken {
 		// and deposit it in the recipients collection using their collection reference
         //
 		pub fun mintMultipleNFT(recipient: &{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}, eventID: UInt64, tickets:[VeraTicket.NFTStruct], gatickets: UInt64, astickets: UInt64) {
-            let eventCollection = VeraTicket.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+            let eventCollection = VeraTicket.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
             let veraevent: VeraEvent.EventStruct = VeraEvent.getEvent(id: eventID)
-            // var eventtier: VeraEvent.Tier = {} as! VeraEvent.Tier
-            // var eventsubtier: VeraEvent.SubTier = {} as! VeraEvent.SubTier
             var eventMaxTickets:UInt64 = veraevent.maxTickets;
             var eventTotalTicketsMinted:UInt64 = veraevent.totalTicketsMinted + gatickets + astickets;
             var maxTickets:UInt64 = 0;
@@ -290,7 +285,6 @@ pub contract VeraTicket: NonFungibleToken {
                 emit Minted(id: VeraTicket.totalSupply)
                 eventCollection.incrementTicketMinted(eventId: eventID, tier: nft.tier, subtier: nft.subtier)
                 VeraTicket.totalSupply = VeraTicket.totalSupply + (1 as UInt64)
-                // veraevent.incrementTicketMinted(tier: tier, subtier: subtier)
             }
 	    }
     }
@@ -303,7 +297,7 @@ pub contract VeraTicket: NonFungibleToken {
     //
     pub fun fetch(_ from: Address, itemID: UInt64): &VeraTicket.NFT? {
         let collection = getAccount(from)
-            .getCapability(VeraTicket.CollectionPublicPath)
+            .getCapability(VeraTicket.VeraTicketPubStorage)
             .borrow<&VeraTicket.Collection{VeraTicket.TicketsCollectionPublic}>()
             ?? panic("Couldn't get collection")
         // We trust Tickets.Collection.borowTicket to get the correct itemID
@@ -315,9 +309,9 @@ pub contract VeraTicket: NonFungibleToken {
     //
 	init() {
         // Set our named paths
-        self.CollectionStoragePath = /storage/veraTicketCollection
-        self.CollectionPublicPath = /public/veraTicketCollection
-        self.MinterStoragePath = /storage/veraTicketMinter
+        self.VeraTicketStorage = /storage/veraTicketCollection
+        self.VeraTicketPubStorage = /public/veraTicketCollection
+        self.VeraMinterStorage = /storage/veraTicketMinter
 
         // Initialize the total supply
         self.totalSupply = 0
@@ -325,7 +319,7 @@ pub contract VeraTicket: NonFungibleToken {
 
         // Create a Minter resource and save it to storage
         let minter <- create NFTMinter()
-        self.account.save(<-minter, to: self.MinterStoragePath)
+        self.account.save(<-minter, to: self.VeraMinterStorage)
 
         emit ContractInitialized()
 	}

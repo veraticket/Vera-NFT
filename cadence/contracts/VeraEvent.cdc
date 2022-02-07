@@ -11,9 +11,9 @@ pub contract VeraEvent {
 
     // Named Paths
     //
-    pub let CollectionStoragePath: StoragePath
-    pub let CollectionPublicPath: PublicPath
-    pub let AdminStoragePath: StoragePath
+    pub let VeraEventStorage: StoragePath
+    pub let VeraEventPubStorage: PublicPath
+    pub let VeraAdminStorage: StoragePath
 
     // totalEvents
     // The total number of Events that have been created
@@ -170,7 +170,7 @@ pub contract VeraEvent {
         }
     }
 
-    pub resource Collection {
+    pub resource EventCollection {
         pub var eventsCollection: {UInt64: VeraEvent.EventStruct}
         pub var metadataObjs: {UInt64: { String : String }}
 
@@ -232,8 +232,8 @@ pub contract VeraEvent {
         }
     }
     
-    priv fun createEmptyCollection(): @VeraEvent.Collection {
-        return <- create Collection()
+    priv fun createEmptyCollection(): @VeraEvent.EventCollection {
+        return <- create EventCollection()
     }
 
     pub resource EventAdmin {
@@ -244,7 +244,7 @@ pub contract VeraEvent {
 		pub fun createEvent(type: VeraEvent.EventType, tier: {UInt64: VeraEvent.Tier}, maxTickets: UInt64, buyLimit: UInt64, defaultRoyaltyAddress: Address, defaultRoyaltyPercent: UFix64, royalty: Royalty, royalties: {UInt64: VeraEvent.AccountRoyalty}, eventURI: String, metadata: {String: String}) {
 			// deposit it in the recipient's account using their reference
 			let veraevent = VeraEvent.EventStruct(id: VeraEvent.totalEvents, type: type, tier: tier, maxTickets: maxTickets, buyLimit: buyLimit, defaultRoyaltyAddress:defaultRoyaltyAddress, defaultRoyaltyPercent:defaultRoyaltyPercent, royalty: royalty, royalties: royalties, eventURI: eventURI)
-            let collection = VeraEvent.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+            let collection = VeraEvent.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
             collection.addEvent(veraevent: veraevent, metadata: metadata)
             VeraEvent.totalEvents = VeraEvent.totalEvents + (1 as UInt64)
 		}
@@ -255,7 +255,7 @@ pub contract VeraEvent {
         pub fun updateEvent(id:UInt64, type: VeraEvent.EventType, tier: {UInt64: VeraEvent.Tier}, maxTickets: UInt64, buyLimit: UInt64, defaultRoyaltyAddress: Address, defaultRoyaltyPercent: UFix64, royalty: Royalty, royalties: {UInt64: VeraEvent.AccountRoyalty}, eventURI: String, metadata: {String: String}) {
 			// deposit it in the recipient's account using their reference
 			let veraevent = VeraEvent.EventStruct(id: id, type: type, tier: tier, maxTickets: maxTickets, buyLimit: buyLimit, defaultRoyaltyAddress:defaultRoyaltyAddress, defaultRoyaltyPercent:defaultRoyaltyPercent, royalty: royalty, royalties: royalties, eventURI: eventURI)
-            let collection = VeraEvent.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+            let collection = VeraEvent.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
             collection.updateEvent(veraevent: veraevent, metadata: metadata)
 		}
 	}
@@ -265,12 +265,12 @@ pub contract VeraEvent {
     // and deposit it in the recipients collection using their collection reference
     //
     pub fun getEvent(id:UInt64): VeraEvent.EventStruct {
-        let collection = VeraEvent.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+        let collection = VeraEvent.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
         return collection.getEvent(eventId: id)
     }
 
     pub fun getMetadata(id:UInt64): { String : String} {
-        let collection = VeraEvent.account.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)!
+        let collection = VeraEvent.account.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
         return collection.getMetadata(eventId: id)
     }
 
@@ -278,20 +278,20 @@ pub contract VeraEvent {
     //
 	init() {
         // Set our named paths
-        self.CollectionStoragePath = /storage/veraeventCollection
-        self.CollectionPublicPath = /public/veraeventCollection
-        self.AdminStoragePath = /storage/veraEventdmin
+        self.VeraEventStorage = /storage/veraeventCollection
+        self.VeraEventPubStorage = /public/veraeventCollection
+        self.VeraAdminStorage = /storage/veraEventdmin
 
         // Initialize the total events
         self.totalEvents = 0
         
         // Create a Minter resource and save it to storage
         let eventAdmin <- create EventAdmin()
-        self.account.save(<-eventAdmin, to: self.AdminStoragePath)
+        self.account.save(<-eventAdmin, to: self.VeraAdminStorage)
 
         // Create a Collection resource and save it to storage
         let eventCollection <- self.createEmptyCollection()
-        self.account.save(<-eventCollection, to: self.CollectionStoragePath)
+        self.account.save(<-eventCollection, to: self.VeraEventStorage)
 
         emit ContractInitialized()
 	}

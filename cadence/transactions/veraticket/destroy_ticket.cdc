@@ -17,7 +17,7 @@ transaction(address: Address, eventID:UInt64, tier:UInt64, subtier: UInt64, tick
         // get the public account object for the recipient
         let account = getAccount(address)
 
-        let collection = getAccount(address).getCapability<&VeraTicket.Collection{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}>(VeraTicket.CollectionPublicPath).borrow() ?? panic("Unable to get Collection Reference")
+        let collection = getAccount(address).getCapability<&VeraTicket.Collection{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}>(VeraTicket.VeraTicketPubStorage).borrow() ?? panic("Unable to get Collection Reference")
         if  collection != nil {
             if let item = collection.borrowTicket(id: ticketID) {
                 if (item.eventID == eventID && item.tier == tier && item.subtier == subtier) {

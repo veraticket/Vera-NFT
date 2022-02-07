@@ -10,11 +10,11 @@ transaction(recipient: Address, withdrawID: UInt64) {
         let recipient = getAccount(recipient)
 
         // borrow a reference to the signer's NFT collection
-        let collectionRef = signer.borrow<&VeraTicket.Collection>(from: VeraTicket.CollectionStoragePath)
+        let collectionRef = signer.borrow<&VeraTicket.Collection>(from: VeraTicket.VeraTicketStorage)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipient.getCapability(VeraTicket.CollectionPublicPath)!.borrow<&{NonFungibleToken.CollectionPublic}>()!
+        let depositRef = recipient.getCapability(VeraTicket.VeraTicketPubStorage)!.borrow<&{NonFungibleToken.CollectionPublic}>()!
 
         // withdraw the NFT from the owner's collection
         let ticket <- collectionRef.withdraw(withdrawID: withdrawID)

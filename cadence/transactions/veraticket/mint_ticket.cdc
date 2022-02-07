@@ -13,7 +13,7 @@ transaction(recipient: Address, eventID: UInt64, type: UInt64, tier: UInt64, sub
     let minter: &VeraTicket.NFTMinter
 
     // Variable to hold event collection
-    let collection: &VeraEvent.Collection
+    let collection: &VeraEvent.EventCollection
     
     // Variable to hold event
     let event: VeraEvent.EventStruct
@@ -23,12 +23,12 @@ transaction(recipient: Address, eventID: UInt64, type: UInt64, tier: UInt64, sub
     prepare(signer: AuthAccount) {
 
         // borrow a reference to the NFTMinter resource in storage
-        self.minter = signer.borrow<&VeraTicket.NFTMinter>(from: VeraTicket.MinterStoragePath)
+        self.minter = signer.borrow<&VeraTicket.NFTMinter>(from: VeraTicket.VeraMinterStorage)
             ?? panic("Could not borrow a reference to the NFT minter")
         
         // get the Event for which the Ticket is to be minted
         // get the Event for which the Ticket is to be minted
-        self.collection = signer.borrow<&VeraEvent.Collection>(from: VeraEvent.CollectionStoragePath)
+        self.collection = signer.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)
             ?? panic("Could not borrow a reference to the owner's collection")  
   
         self.event = self.collection.getEvent(eventId: eventID)
@@ -43,7 +43,7 @@ transaction(recipient: Address, eventID: UInt64, type: UInt64, tier: UInt64, sub
 
         // borrow the recipient's public NFT collection reference
         let receiver = recipient
-            .getCapability(VeraTicket.CollectionPublicPath)!
+            .getCapability(VeraTicket.VeraTicketPubStorage)!
             .borrow<&{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}>()
             ?? panic("Could not get receiver reference to the NFT Collection")
 

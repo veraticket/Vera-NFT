@@ -6,7 +6,7 @@ import VeraTicket from "../../contracts/VeraTicket.cdc"
 pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
 
-    let collectionRef = account.getCapability(VeraTicket.CollectionPublicPath)!.borrow<&{NonFungibleToken.CollectionPublic}>()
+    let collectionRef = account.getCapability(VeraTicket.VeraTicketPubStorage)!.borrow<&{NonFungibleToken.CollectionPublic}>()
         ?? panic("Could not borrow capability from public collection")
     
     return collectionRef.getIDs()

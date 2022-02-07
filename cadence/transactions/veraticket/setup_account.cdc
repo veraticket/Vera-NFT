@@ -6,16 +6,16 @@ import VeraTicket from "../../contracts/VeraTicket.cdc"
 transaction {
     prepare(signer: AuthAccount) {
         // if the account doesn't already have a collection
-        if signer.borrow<&VeraTicket.Collection>(from: VeraTicket.CollectionStoragePath) == nil {
+        if signer.borrow<&VeraTicket.Collection>(from: VeraTicket.VeraTicketStorage) == nil {
 
             // create a new empty collection
             let collection <- VeraTicket.createEmptyCollection()
             
             // save it to the account
-            signer.save(<-collection, to: VeraTicket.CollectionStoragePath)
+            signer.save(<-collection, to: VeraTicket.VeraTicketStorage)
 
             // create a public capability for the collection
-            signer.link<&VeraTicket.Collection{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}>(VeraTicket.CollectionPublicPath, target: VeraTicket.CollectionStoragePath)
+            signer.link<&VeraTicket.Collection{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}>(VeraTicket.VeraTicketPubStorage, target: VeraTicket.VeraTicketStorage)
         }
     }
 }
