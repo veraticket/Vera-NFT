@@ -251,6 +251,10 @@ pub contract VeraTicket: NonFungibleToken {
             var maxTickets:UInt64 = 0;
             var ticketsMinted:UInt64 = 0
 
+            if (tickets.length > 100) {
+              panic("Cannot Mint Tickets more than 100 in one batch")
+            }
+
             if (eventTotalTicketsMinted > eventMaxTickets) {
               panic("Cannot Mint Tickets more than Event Max Tickets")
             }
